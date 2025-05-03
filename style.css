@@ -255,10 +255,7 @@ canvas {
   opacity: 0.05;
 }
 
-@keyframes scrollBackground {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
+
 
 #legend {
   position: absolute;

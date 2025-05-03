@@ -1,3 +1,4 @@
+let fireHue = 30;
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 let width, height;
@@ -59,14 +60,15 @@ function startGame() {
   document.getElementById('tapToStart').style.display = 'none';
   document.getElementById('scoreDisplay').style.display = 'block';
   gameStarted = true;
+  fireHue += 0.5;
+  if (fireHue > 60) fireHue = 30;
   gameInterval = requestAnimationFrame(updateGame);
 }
 
 function endGame(type = "default") {
   if (gameEnded) return;
   gameEnded = true;
-  document.body.classList.add('flash');
-  setTimeout(() => document.body.classList.remove('flash'), 1000);
+  // Efecto de temblor eliminado
   cancelAnimationFrame(gameInterval);
   spark = true;
   sparkFrames = 30;
@@ -145,10 +147,10 @@ function drawPlayer() {
       ctx.moveTo(t1.x - (i - 1) * 4, t1.y);
       ctx.lineTo(t2.x - i * 4, t2.y);
 
-      const hue = 280 + (i * 2); // Colores ciberpunk
-      ctx.strokeStyle = `hsl(${hue % 360}, 100%, 60%)`;
+      const hue = 50 + Math.sin(i * 0.2) * 10; // Amarillo fuego cálido
+      ctx.strokeStyle = `hsl(${hue}, 100%, 70%)`;
       ctx.lineWidth = Math.max(1, 3 - i * 0.05);
-      ctx.shadowColor = `hsl(${hue % 360}, 100%, 60%)`;
+      ctx.shadowColor = `hsl(${hue}, 100%, 85%)`;
       ctx.shadowBlur = 12;
       ctx.stroke();
     }
@@ -157,15 +159,17 @@ function drawPlayer() {
 
   // Dibujar la bola principal
   ctx.save();
-  const jitterX = Math.random() * 2 - 1;  // vibración horizontal leve
-  const jitterY = Math.random() * 2 - 1;  // vibración vertical leve
+  const jitterX = Math.random() * 2 - 1;
+  const jitterY = Math.random() * 2 - 1;
   ctx.translate(player.x + jitterX, player.y + jitterY);
   ctx.scale(player.scale, player.scale);
   ctx.beginPath();
   ctx.arc(0, 0, player.r, 0, Math.PI * 2);
-  ctx.fillStyle = '#ffcc00';
-  ctx.shadowColor = 'yellow';
-  ctx.shadowBlur = 20;
+  const fuegoHues = [30, 40, 50, 60]; // Tonos naranja-amarillo
+  const hue = fuegoHues[Math.floor(Math.random() * fuegoHues.length)];
+  ctx.fillStyle = `hsl(${hue}, 100%, 55%)`;
+  ctx.shadowColor = `hsl(${hue}, 100%, 90%)`;
+  ctx.shadowBlur = 25;
   ctx.fill();
   ctx.closePath();
   ctx.restore();
@@ -177,13 +181,14 @@ function drawPlayer() {
     const x2 = player.x + Math.cos(angle) * length;
     const y2 = player.y + Math.sin(angle) * length;
 
-    const hue = Math.floor(Math.random() * 360);
+    const hues = [40, 50, 60, 30, 0]; // Amarillo, blanco cálido y naranja fuego
+    const hue = hues[Math.floor(Math.random() * hues.length)];
     ctx.beginPath();
     ctx.moveTo(player.x, player.y);
     ctx.lineTo(x2, y2);
-    ctx.strokeStyle = `hsl(${hue}, 100%, 70%)`;
+    ctx.strokeStyle = `hsl(${hue}, 100%, 85%)`;
     ctx.lineWidth = 1.5;
-    ctx.shadowColor = `hsl(${hue}, 100%, 70%)`;
+    ctx.shadowColor = `hsl(${hue}, 100%, 90%)`;
     ctx.shadowBlur = 15;
     ctx.stroke();
     ctx.shadowBlur = 0;
@@ -193,12 +198,22 @@ function drawPlayer() {
 
 function drawPipes() {
   for (let p of pipes) {
-    ctx.fillStyle = '#ff4444';
-    ctx.fillRect(p.x, 0, pipeWidth, p.top);
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 16px sans-serif';
-    ctx.fillText('⚡', p.x + 15, p.top - 5);
+    // PRODUCCIÓN (parte superior) - rojo con gradiente
+    const gradProd = ctx.createLinearGradient(p.x, 0, p.x + pipeWidth, p.top);
+    gradProd.addColorStop(0, "#ff0000");
+    gradProd.addColorStop(0.5, "#ff4444");
+    gradProd.addColorStop(1, "#ffffff");
 
+    ctx.fillStyle = gradProd;
+    ctx.shadowColor = "#ff5555";
+    ctx.shadowBlur = 10;
+    ctx.fillRect(p.x, 0, pipeWidth, p.top);
+
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 16px sans-serif";
+    ctx.fillText("⚡", p.x + 15, p.top - 5);
+
+    // Efectos eléctricos aleatorios
     for (let i = 0; i < 3; i++) {
       const sx = p.x + Math.random() * pipeWidth;
       const sy = Math.random() * (p.top - 10);
@@ -207,22 +222,34 @@ function drawPipes() {
       ctx.beginPath();
       ctx.moveTo(sx, sy);
       ctx.lineTo(ex, ey);
-      ctx.strokeStyle = 'rgba(255, 255, 0, 0.8)';
+      ctx.strokeStyle = "rgba(255, 255, 0, 0.8)";
       ctx.lineWidth = 1;
-      ctx.shadowColor = 'yellow';
+      ctx.shadowColor = "yellow";
       ctx.shadowBlur = 5;
       ctx.stroke();
       ctx.shadowBlur = 0;
     }
 
-    ctx.fillStyle = '#0077ff';
+    // CONSUMO (parte inferior) - azul con gradiente
+    const gradCons = ctx.createLinearGradient(p.x, p.top + pipeGap, p.x + pipeWidth, height);
+    gradCons.addColorStop(0, "#66ccff");
+    gradCons.addColorStop(0.5, "#0077ff");
+    gradCons.addColorStop(1, "#ffffff");
+
+    ctx.fillStyle = gradCons;
+    ctx.shadowColor = "#66ccff";
+    ctx.shadowBlur = 10;
     ctx.fillRect(p.x, p.top + pipeGap, pipeWidth, height - p.top - pipeGap);
-    ctx.fillStyle = '#fff';
-    ctx.fillText('💡', p.x + 15, p.top + pipeGap + 30);
+
+    ctx.fillStyle = "#fff";
+    ctx.fillText("💡", p.x + 15, p.top + pipeGap + 30);
+
     if (Math.random() < 0.15) {
-      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.fillStyle = "rgba(0,0,0,0.2)";
       ctx.fillRect(p.x, p.top + pipeGap, pipeWidth, height - p.top - pipeGap);
     }
+
+    ctx.shadowBlur = 0;
   }
 }
 
@@ -368,6 +395,8 @@ function updateGame() {
   let potencia = 50 - ((player.y / height) * 30);
   potencia = Math.max(20, Math.min(50, potencia));
 
+  fireHue += 0.5;
+  if (fireHue > 60) fireHue = 30;
   gameInterval = requestAnimationFrame(updateGame);
 }
 
@@ -420,14 +449,15 @@ function drawSpark(x, y) {
     const x2 = x + Math.cos(angle) * length;
     const y2 = y + Math.sin(angle) * length;
 
-    const hue = Math.floor(Math.random() * 360);
+    const hues = [40, 50, 60, 30, 0]; // Amarillo, blanco cálido y naranja fuego
+    const hue = hues[Math.floor(Math.random() * hues.length)];
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(x2, y2);
-    ctx.strokeStyle = `hsl(${hue}, 100%, 70%)`;
+    ctx.strokeStyle = `hsl(${hue}, 100%, 85%)`;
     ctx.lineWidth = Math.random() * 3 + 1;
-    ctx.shadowColor = `hsl(${hue}, 100%, 70%)`;
-    ctx.shadowBlur = 20;
+    ctx.shadowColor = `hsl(${hue}, 100%, 90%)`;
+    ctx.shadowBlur = 25;
     ctx.stroke();
   }
   ctx.shadowBlur = 0;
@@ -463,14 +493,15 @@ function drawSpark(x, y) {
     const x2 = x + Math.cos(angle) * length;
     const y2 = y + Math.sin(angle) * length;
 
-    const hue = Math.floor(Math.random() * 360);
+    const hues = [40, 50, 60, 30, 0]; // Amarillo, blanco cálido y naranja fuego
+    const hue = hues[Math.floor(Math.random() * hues.length)];
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(x2, y2);
     ctx.strokeStyle = `hsl(${hue}, 100%, 70%)`;
     ctx.lineWidth = Math.random() * 3 + 1;
     ctx.shadowColor = `hsl(${hue}, 100%, 70%)`;
-    ctx.shadowBlur = 20;
+    ctx.shadowBlur = 25;
     ctx.stroke();
   }
   ctx.shadowBlur = 0;
