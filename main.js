@@ -410,6 +410,7 @@ function flap() {
     player.scale = 1.3;
     setTimeout(() => player.scale = 1, 100);
     const sound = document.getElementById('jumpSound');
+    sound.volume = 1.0; // Aumenta el volumen al máximo
     sound.currentTime = 0;
     sound.play();
   }
