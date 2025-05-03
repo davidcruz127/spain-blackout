@@ -89,8 +89,6 @@ function endGame(type = "default") {
   setTimeout(() => warningBox.style.display = "none", 1200);
 
   if (type === "overvoltage") {
-    document.body.classList.add('shake');
-    setTimeout(() => document.body.classList.remove('shake'), 600);
     let flash = true;
     const flashInterval = setInterval(() => {
       gridAlpha = flash ? 0.2 : 0.05;
