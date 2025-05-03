@@ -299,10 +299,3 @@ canvas {
   50% { background-color: #000; }
   100% { background-color: #111; }
 }
-
-
-/* Override for parallax branch */
-#backgroundLayer {
-  animation: none;
-  opacity: 0.03;
-}
