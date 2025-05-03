@@ -15,7 +15,7 @@ let pipes = [];
 let hazards = [];
 let frame = 0;
 let gameInterval;
-let pipeGap = 280;
+let pipeGap = 620;
 let pipeSpeed = 3;
 let pipeSpacing = 110;
 const pipeWidth = 60;
@@ -41,7 +41,7 @@ function prepareGame() {
   gameStarted = false;
 
   player = { x: width / 3, y: height * 0.1, r: 20, scale: 1 };
-  gravity = 0.25;
+  gravity = 0.22;
   lift = -10;
   velocity = 0;
   pipes = [];
@@ -149,9 +149,9 @@ function drawPlayer() {
 
       const hue = 50 + Math.sin(i * 0.2) * 10; // Amarillo fuego cálido
       ctx.strokeStyle = `hsl(${hue}, 100%, 70%)`;
-      ctx.lineWidth = Math.max(1, 3 - i * 0.05);
+      ctx.lineWidth = Math.max(2, 10 - i * 0.05);
       ctx.shadowColor = `hsl(${hue}, 100%, 85%)`;
-      ctx.shadowBlur = 12;
+      ctx.shadowBlur = 15;
       ctx.stroke();
     }
     ctx.shadowBlur = 0;

@@ -70,20 +70,24 @@ button:hover {
 
 /* Pantalla de game over */
 #gameOver {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.95);
-  display: flex;
+  width: 100%;
+  height: 100%;
+  background-image: url('img/blackout_background.png'); /* o simplemente 'blackout_background.png' si está en la misma carpeta */
+  background-size: cover;
+  background-position: center;
+  display: none; /* Se activa con JS */
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  z-index: 1000;
-  padding: 20px;
-  box-sizing: border-box;
+  justify-content: center;
+  color: white;
+  text-shadow: 1px 1px 4px black;
+  font-family: sans-serif;
+  z-index: 10;
 }
+
 
 #gameOver h1 {
   color: #ff4c4c;
