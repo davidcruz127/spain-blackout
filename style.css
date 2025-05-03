@@ -2,9 +2,9 @@
 body {
   margin: 0;
   overflow: hidden;
-  font-family: 'Arial', sans-serif;
-  background-color: black;
-  color: white;
+  font-family: 'Orbitron', sans-serif;
+  background-color: #0d0d0d;
+  color: #00ffff;
 }
 
 button {
@@ -99,7 +99,7 @@ button:hover {
 }
 
 #ranking {
-  color: white;
+  color: #00ffff;
   font-size: 1rem;
   margin: 10px 0 20px;
   text-align: center;
@@ -239,6 +239,10 @@ canvas {
 }
 
 #backgroundLayer {
+  background: url('fondo.jpg') center center / cover no-repeat;
+  background-attachment: fixed;
+  opacity: 0.3;
+  z-index: -1;
   position: fixed;
   top: 0;
   left: 0;
@@ -265,7 +269,7 @@ canvas {
   padding: 6px 10px;
   border-radius: 8px;
   z-index: 10;
-  color: white;
+  color: #00ffff;
   line-height: 1.4;
   font-family: sans-serif;
 }

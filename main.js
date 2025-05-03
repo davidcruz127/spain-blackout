@@ -339,25 +339,6 @@ function updateGame() {
   gameInterval = requestAnimationFrame(updateGame);
 }
 
-function drawSpark(x, y) {
-  for (let i = 0; i < 30; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const length = Math.random() * 40 + 20;
-    const x2 = x + Math.cos(angle) * length;
-    const y2 = y + Math.sin(angle) * length;
-
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x2, y2);
-    ctx.strokeStyle = 'rgba(255, 255, 0, 0.95)';
-    ctx.lineWidth = 3;
-    ctx.shadowColor = 'yellow';
-    ctx.shadowBlur = 20;
-    ctx.stroke();
-  }
-  ctx.shadowBlur = 0;
-}
-
 function flap() {
   if (gameReady && !gameStarted) {
     startGame();
@@ -399,3 +380,47 @@ window.addEventListener('load', () => {
   document.addEventListener('click', flap);
   document.addEventListener('touchstart', flap);
 });
+
+function drawSpark(x, y) {
+  for (let i = 0; i < 40; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const length = Math.random() * 50 + 30;
+    const x2 = x + Math.cos(angle) * length;
+    const y2 = y + Math.sin(angle) * length;
+
+    const hue = Math.floor(Math.random() * 360);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x2, y2);
+    ctx.strokeStyle = `hsl(${hue}, 100%, 70%)`;
+    ctx.lineWidth = Math.random() * 3 + 1;
+    ctx.shadowColor = `hsl(${hue}, 100%, 70%)`;
+    ctx.shadowBlur = 20;
+    ctx.stroke();
+  }
+  ctx.shadowBlur = 0;
+}
+function drawGridBackground() {
+  ctx.save();
+  ctx.strokeStyle = `rgba(0,255,255,${gridAlpha})`;
+  ctx.lineWidth = 1;
+
+  const offsetX = gridOffsetX;
+  const offsetY = gridOffsetY;
+
+  for (let x = -40; x < width + 40; x += 40) {
+    ctx.beginPath();
+    ctx.moveTo(x + offsetX, 0);
+    ctx.lineTo(x + offsetX, height);
+    ctx.stroke();
+  }
+
+  for (let y = -40; y < height + 40; y += 40) {
+    ctx.beginPath();
+    ctx.moveTo(0, y + offsetY);
+    ctx.lineTo(width, y + offsetY);
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
