@@ -1,96 +1,297 @@
-
-html, body {
+/* General */
+body {
   margin: 0;
-  padding: 0;
   overflow: hidden;
-  height: 100%;
-  background: black;
-  font-family: sans-serif;
+  font-family: 'Arial', sans-serif;
+  background-color: black;
   color: white;
 }
-canvas {
-  display: block;
-  background: linear-gradient(to bottom, #111, #333);
+
+button {
+  font-size: 1.2rem;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 12px;
+  background-color: #ffc107;
+  color: black;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease;
 }
-#menu, #gameOver, #tapToStart, #intro {
+
+button:hover {
+  transform: scale(1.05);
+}
+
+/* Intro animado */
+#intro {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: black;
+  color: yellow;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  z-index: 9999;
+  opacity: 1;
+  transition: opacity 1s ease-out;
+}
+
+#intro.fade-out {
+  opacity: 0;
+}
+
+/* Menú principal */
+#menu {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.85);
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 10;
+}
+
+/* Pantalla de toque para iniciar */
+#tapToStart {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.5rem;
+  color: #ffff00;
+  display: none;
+  text-shadow: 0 0 10px yellow;
+  z-index: 10;
+}
+
+/* Pantalla de game over */
+#gameOver {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.95);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+#gameOver h1 {
+  color: #ff4c4c;
+  font-size: 2rem;
+  text-align: center;
+  margin: 10px 0;
+}
+
+#finalScore {
+  color: #ffff00;
+  font-size: 1.5rem;
+  margin: 10px 0;
+}
+
+#ranking {
+  color: white;
+  font-size: 1rem;
+  margin: 10px 0 20px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+#retryButton {
+  font-size: 1.2rem;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  background-color: #ffc107;
+  color: black;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  transition: transform 0.2s ease;
+}
+
+#retryButton:hover {
+  transform: scale(1.05);
+}
+
+#gameOver h1 {
+  color: red;
+}
+
+#finalScore {
+  margin-top: 10px;
+  font-size: 1.2rem;
+}
+
+/* Panel de puntuación */
+#scoreDisplay, #powerDisplay, #warning {
+  position: absolute;
+  top: 10px;
+  font-size: 1rem;
+  padding: 6px 12px;
+  background-color: rgba(0,0,0,0.5);
+  border-radius: 8px;
   z-index: 10;
 }
-#intro {
-  z-index: 20;
-  background: black;
-  color: #ffcc00;
-  font-size: 2.5em;
-  text-shadow: 0 0 10px yellow;
-  opacity: 0;
-  animation: introFlash 2s ease-out forwards;
+
+#scoreDisplay {
+  left: 10px;
 }
-#tapToStart {
-  display: none;
-  font-size: 1.5em;
-  text-align: center;
-  color: #ffcc00;
+
+#powerDisplay {
+  right: 10px;
 }
-h1 {
-  font-size: 2em;
-  margin-bottom: 20px;
-  text-align: center;
-}
-#scoreDisplay, #powerDisplay {
-  position: absolute;
-  font-size: 1.5em;
-  z-index: 5;
-  text-shadow: 1px 1px 2px black;
-}
-#scoreDisplay { top: 10px; left: 15px; color: #ffcc00; }
-#powerDisplay { top: 10px; right: 15px; color: #00ffcc; }
-#ranking {
-  margin-top: 20px;
-  font-size: 1.2em;
-  text-align: center;
-  color: #ffcc00;
-}
+
 #warning {
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: orange;
+  font-weight: bold;
   display: none;
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 1.8em;
-  color: #ffcc00;
-  background: rgba(0,0,0,0.7);
-  padding: 1em 2em;
-  border-radius: 10px;
-  z-index: 15;
-  text-align: center;
 }
-button {
-  padding: 1em 2em;
-  font-size: 1.2em;
-  background: #ffcc00;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
+
+/* Canvas del juego */
+canvas {
+  display: block;
+  background-color: #111;
 }
-body.shake {
-  animation: shake 0.3s linear 2;
+
+/* Efectos especiales */
+.shake {
+  animation: shake 0.5s;
 }
+
 @keyframes shake {
-  0%, 100% { transform: translate(0, 0); }
-  25% { transform: translate(5px, -5px); }
-  50% { transform: translate(-5px, 5px); }
-  75% { transform: translate(5px, 5px); }
+  0% { transform: translate(2px, 2px); }
+  25% { transform: translate(-2px, -2px); }
+  50% { transform: translate(2px, -2px); }
+  75% { transform: translate(-2px, 2px); }
+  100% { transform: translate(0, 0); }
 }
-body.dark { background: #000000 !important; }
-@keyframes introFlash {
-  0% { opacity: 0; transform: scale(0.8); text-shadow: 0 0 0 yellow; }
-  30% { opacity: 1; transform: scale(1.05); text-shadow: 0 0 15px yellow; }
-  60% { text-shadow: 0 0 5px yellow; transform: scale(1); }
-  100% { opacity: 0; }
+
+.dark {
+  background-color: black !important;
+}
+
+
+@media (max-width: 480px) {
+  #gameOver {
+    padding: 15px 10px;
+  }
+
+  #gameOver h1 {
+    font-size: 1.4rem;
+  }
+
+  #finalScore {
+    font-size: 1.2rem;
+  }
+
+  #ranking {
+    font-size: 0.9rem;
+  }
+
+  #retryButton {
+    font-size: 1rem;
+    padding: 10px 20px;
+  }
+}
+
+
+@media (max-width: 480px) {
+  /* Menú de inicio */
+  #menu {
+    top: 30%;
+    width: 90%;
+    transform: translateX(-50%);
+  }
+
+  #menu h1 {
+    font-size: 1.8rem;
+  }
+
+  #menu .subtitle {
+    font-size: 1.2rem;
+    margin: 10px 0 20px;
+  }
+
+  #startButton {
+    width: 100%;
+    font-size: 1.2rem;
+    padding: 12px;
+  }
+
+  /* Tap to start */
+  #tapToStart {
+    font-size: 1.2rem;
+    text-align: center;
+    padding: 0 10px;
+  }
+}
+
+#backgroundLayer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  background: url('fondo.jpg') repeat-x;
+  background-size: cover;
+  animation: scrollBackground 30s linear infinite;
+  z-index: 0;
+  opacity: 0.05;
+}
+
+@keyframes scrollBackground {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+#legend {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  font-size: 0.9rem;
+  background-color: rgba(0,0,0,0.5);
+  padding: 6px 10px;
+  border-radius: 8px;
+  z-index: 10;
+  color: white;
+  line-height: 1.4;
+  font-family: sans-serif;
+}
+
+.legend-icon {
+  display: inline-block;
+  margin-right: 6px;
+  font-weight: bold;
+}
+
+#scoreDisplay {
+  left: 10px;
+  font-size: 1.3rem;
+  background-color: rgba(255, 204, 0, 0.85);
+  color: black;
+  font-weight: bold;
+  padding: 8px 14px;
+  box-shadow: 0 0 6px rgba(255, 255, 0, 0.8);
+}
+
+.flash {
+  animation: flashScreen 0.3s ease-in-out 3;
+}
+
+@keyframes flashScreen {
+  0% { background-color: #fff; }
+  50% { background-color: #000; }
+  100% { background-color: #111; }
 }

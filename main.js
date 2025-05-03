@@ -1,6 +1,3 @@
-
-// Spain Blackout - Juego completo en JavaScript
-
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 let width, height;
@@ -40,7 +37,7 @@ function prepareGame() {
   gameReady = true;
   gameStarted = false;
 
-  player = { x: width / 4, y: height / 2, r: 20, vx: 1.2, scale: 1 };
+  player = { x: width / 3, y: height * 0.35, r: 20, scale: 1 };
   gravity = 0.6;
   lift = -12;
   velocity = 0;
@@ -64,9 +61,18 @@ function startGame() {
 }
 
 function endGame(type = "default") {
+  document.body.classList.add('flash');
+  setTimeout(() => document.body.classList.remove('flash'), 1000);
   cancelAnimationFrame(gameInterval);
   spark = true;
   sparkFrames = 10;
+  drawSpark(player.x, player.y);
+  ctx.clearRect(0, 0, width, height);
+  drawGridBackground();
+  drawPipes();
+  drawHazards();
+  drawPlayer();
+  drawSpark(player.x, player.y);
 
   const warningBox = document.getElementById("warning");
   const warnings = {
@@ -115,12 +121,14 @@ function endGame(type = "default") {
       blackout: "💡 ¡Apagón total por falta de suministro!",
       default: "🔌 ¡Has perdido el control del sistema!"
     }[type] || "🔌 ¡Has perdido el control del sistema!";
-    document.getElementById('gameOver').style.display = 'flex';
+    const endSound = document.getElementById("endGameSound");
+if (endSound) {
+  endSound.currentTime = 0;
+  endSound.play();
+}
+document.getElementById('gameOver').style.display = 'flex';
   }, 500);
 }
-
-// Quedan funciones drawPlayer, drawPipes, drawHazards, updateGame, flap y skipIntro que se pueden continuar en el siguiente bloque
-
 
 function drawPlayer() {
   trail.unshift({ x: player.x, y: player.y + Math.sin(player.x * 0.1) * 5 });
@@ -159,6 +167,7 @@ function drawPipes() {
     ctx.fillStyle = '#fff';
     ctx.font = 'bold 16px sans-serif';
     ctx.fillText('⚡', p.x + 15, p.top - 5);
+
     for (let i = 0; i < 3; i++) {
       const sx = p.x + Math.random() * pipeWidth;
       const sy = Math.random() * (p.top - 10);
@@ -175,7 +184,7 @@ function drawPipes() {
       ctx.shadowBlur = 0;
     }
 
-    ctx.fillStyle = '#222';
+    ctx.fillStyle = '#0077ff';
     ctx.fillRect(p.x, p.top + pipeGap, pipeWidth, height - p.top - pipeGap);
     ctx.fillStyle = '#fff';
     ctx.fillText('💡', p.x + 15, p.top + pipeGap + 30);
@@ -268,7 +277,7 @@ function updateGame() {
   if (frame % 800 === 0) {
     hazards.push({
       x: width,
-      y: height / 2,
+      y: height * 0.35,
       active: false,
       frameStart: frame + 100,
       frameEnd: frame + 120,
@@ -284,8 +293,7 @@ function updateGame() {
 
   velocity += gravity;
   player.y += velocity;
-  player.x += player.vx;
-
+  
   if (player.y + player.r > height || player.y - player.r < 0 || player.x + player.r > width) {
     endGame("default");
     return;
@@ -327,25 +335,24 @@ function updateGame() {
 
   let potencia = 50 - ((player.y / height) * 30);
   potencia = Math.max(20, Math.min(50, potencia));
-  document.getElementById('powerDisplay').innerText = 'Potencia: ' + potencia.toFixed(1) + ' GW';
 
   gameInterval = requestAnimationFrame(updateGame);
 }
 
 function drawSpark(x, y) {
-  for (let i = 0; i < 15; i++) {
+  for (let i = 0; i < 30; i++) {
     const angle = Math.random() * Math.PI * 2;
-    const length = Math.random() * 20 + 10;
+    const length = Math.random() * 40 + 20;
     const x2 = x + Math.cos(angle) * length;
     const y2 = y + Math.sin(angle) * length;
 
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(x2, y2);
-    ctx.strokeStyle = 'rgba(255, 255, 0, 0.9)';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(255, 255, 0, 0.95)';
+    ctx.lineWidth = 3;
     ctx.shadowColor = 'yellow';
-    ctx.shadowBlur = 15;
+    ctx.shadowBlur = 20;
     ctx.stroke();
   }
   ctx.shadowBlur = 0;
@@ -365,3 +372,30 @@ function flap() {
     sound.play();
   }
 }
+
+window.addEventListener('load', () => {
+  const intro = document.getElementById('intro');
+  const introSound = document.getElementById('introSound');
+
+  if (intro) {
+    if (introSound) {
+      introSound.currentTime = 0;
+      introSound.play().catch(err => {
+        console.warn('El navegador bloqueó la reproducción automática del sonido de intro:', err);
+      });
+    }
+
+    intro.classList.add('fade-out');
+    setTimeout(() => {
+      intro.style.display = 'none';
+    }, 1000);
+  }
+
+  const startBtn = document.getElementById('startButton');
+  const retryBtn = document.getElementById('retryButton');
+  if (startBtn) startBtn.addEventListener('click', prepareGame);
+  if (retryBtn) retryBtn.addEventListener('click', prepareGame);
+
+  document.addEventListener('click', flap);
+  document.addEventListener('touchstart', flap);
+});
