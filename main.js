@@ -2,33 +2,9 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 let width, height;
 
-
-/* === Capas parallax === */
-const bgLayers = [
-  { img: new Image(), speed: 0.25, x: 0 },   // cielo lejano
-  { img: new Image(), speed: 0.6,  x: 0 }    // skyline cercano
-];
-bgLayers[0].img.src = 'gfx/sky.webp';
-bgLayers[1].img.src = 'gfx/city.webp';
-
-function drawParallax() {
-  bgLayers.forEach(l => {
-    l.x = (l.x - pipeSpeed * l.speed) % l.img.width;
-    ctx.drawImage(l.img, l.x, 0, l.img.width, height);
-    ctx.drawImage(l.img, l.x + l.img.width, 0, l.img.width, height);
-  });
-}
-
-
 function resize() {
-  const dpr = window.devicePixelRatio || 1;
-canvas.width  = window.innerWidth  * dpr;
-canvas.height = window.innerHeight * dpr;
-canvas.style.width  = window.innerWidth  + 'px';
-canvas.style.height = window.innerHeight + 'px';
-ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-width  = window.innerWidth;
-height = window.innerHeight;
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
 }
 window.addEventListener('resize', resize);
 resize();
@@ -64,7 +40,7 @@ function prepareGame() {
   gameStarted = false;
 
   player = { x: width / 3, y: height * 0.2, r: 20, scale: 1 };
-  gravity = 0.30;
+  gravity = 0.35;
   lift = -10;
   velocity = 0;
   pipes = [];
@@ -96,8 +72,6 @@ function endGame(type = "default") {
   sparkFrames = 30;
   drawSpark(player.x, player.y);
   ctx.clearRect(0, 0, width, height);
-  drawParallax(); // NUEVO parallax
-
   drawGridBackground();
   drawPipes();
   drawHazards();
