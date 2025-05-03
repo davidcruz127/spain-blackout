@@ -28,8 +28,10 @@ let gridAlpha = 0.05;
 let gridOffsetX = 0;
 let gridOffsetY = 0;
 let gridWaveFrame = 0;
+let gameEnded = false; 
 
 function prepareGame() {
+  gameEnded = false; // Reiniciar al preparar nueva partida
   document.getElementById('menu').style.display = 'none';
   document.getElementById('gameOver').style.display = 'none';
   document.getElementById('scoreDisplay').style.display = 'none';
@@ -37,9 +39,9 @@ function prepareGame() {
   gameReady = true;
   gameStarted = false;
 
-  player = { x: width / 3, y: height * 0.35, r: 20, scale: 1 };
-  gravity = 0.6;
-  lift = -12;
+  player = { x: width / 3, y: height * 0.2, r: 20, scale: 1 };
+  gravity = 0.4;
+  lift = -10;
   velocity = 0;
   pipes = [];
   hazards = [];
@@ -61,11 +63,13 @@ function startGame() {
 }
 
 function endGame(type = "default") {
+  if (gameEnded) return;
+  gameEnded = true;
   document.body.classList.add('flash');
   setTimeout(() => document.body.classList.remove('flash'), 1000);
   cancelAnimationFrame(gameInterval);
   spark = true;
-  sparkFrames = 10;
+  sparkFrames = 30;
   drawSpark(player.x, player.y);
   ctx.clearRect(0, 0, width, height);
   drawGridBackground();
@@ -127,38 +131,67 @@ if (endSound) {
   endSound.play();
 }
 document.getElementById('gameOver').style.display = 'flex';
-  }, 500);
+  }, 1200);
 }
 
 function drawPlayer() {
   trail.unshift({ x: player.x, y: player.y + Math.sin(player.x * 0.1) * 5 });
   if (trail.length > 100) trail.pop();
 
+  // Estela ciberpunk
   if (trail.length > 1) {
-    ctx.beginPath();
-    ctx.moveTo(trail[0].x, trail[0].y);
     for (let i = 1; i < trail.length; i++) {
-      const t = trail[i];
-      ctx.lineTo(t.x - i * 5, t.y);
+      const t1 = trail[i - 1];
+      const t2 = trail[i];
+      ctx.beginPath();
+      ctx.moveTo(t1.x - (i - 1) * 4, t1.y);
+      ctx.lineTo(t2.x - i * 4, t2.y);
+
+      const hue = 280 + (i * 2); // Colores ciberpunk
+      ctx.strokeStyle = `hsl(${hue % 360}, 100%, 60%)`;
+      ctx.lineWidth = Math.max(1, 3 - i * 0.05);
+      ctx.shadowColor = `hsl(${hue % 360}, 100%, 60%)`;
+      ctx.shadowBlur = 12;
+      ctx.stroke();
     }
-    ctx.strokeStyle = 'rgba(255, 255, 0, 0.8)';
-    ctx.lineWidth = 2;
-    ctx.shadowColor = 'yellow';
-    ctx.shadowBlur = 12;
-    ctx.stroke();
     ctx.shadowBlur = 0;
   }
 
+  // Dibujar la bola principal
   ctx.save();
-  ctx.translate(player.x, player.y);
+  const jitterX = Math.random() * 2 - 1;  // vibración horizontal leve
+  const jitterY = Math.random() * 2 - 1;  // vibración vertical leve
+  ctx.translate(player.x + jitterX, player.y + jitterY);
   ctx.scale(player.scale, player.scale);
   ctx.beginPath();
   ctx.arc(0, 0, player.r, 0, Math.PI * 2);
   ctx.fillStyle = '#ffcc00';
+  ctx.shadowColor = 'yellow';
+  ctx.shadowBlur = 20;
   ctx.fill();
   ctx.closePath();
   ctx.restore();
+
+  // 🔥 Chispa aleatoria
+  if (Math.random() < 0.3) {
+    const angle = Math.random() * Math.PI * 2;
+    const length = Math.random() * 20 + 10;
+    const x2 = player.x + Math.cos(angle) * length;
+    const y2 = player.y + Math.sin(angle) * length;
+
+    const hue = Math.floor(Math.random() * 360);
+    ctx.beginPath();
+    ctx.moveTo(player.x, player.y);
+    ctx.lineTo(x2, y2);
+    ctx.strokeStyle = `hsl(${hue}, 100%, 70%)`;
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = `hsl(${hue}, 100%, 70%)`;
+    ctx.shadowBlur = 15;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
 }
+
 
 function drawPipes() {
   for (let p of pipes) {
@@ -262,6 +295,7 @@ function drawGridBackground() {
 }
 
 function updateGame() {
+  if (gameEnded) return;
   frame++;
   if (frame % 10 === 0) {
     score++;
@@ -423,4 +457,23 @@ function drawGridBackground() {
   }
 
   ctx.restore();
+}
+function drawSpark(x, y) {
+  for (let i = 0; i < 40; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const length = Math.random() * 50 + 30;
+    const x2 = x + Math.cos(angle) * length;
+    const y2 = y + Math.sin(angle) * length;
+
+    const hue = Math.floor(Math.random() * 360);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x2, y2);
+    ctx.strokeStyle = `hsl(${hue}, 100%, 70%)`;
+    ctx.lineWidth = Math.random() * 3 + 1;
+    ctx.shadowColor = `hsl(${hue}, 100%, 70%)`;
+    ctx.shadowBlur = 20;
+    ctx.stroke();
+  }
+  ctx.shadowBlur = 0;
 }
