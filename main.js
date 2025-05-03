@@ -39,8 +39,8 @@ function prepareGame() {
   gameReady = true;
   gameStarted = false;
 
-  player = { x: width / 3, y: height * 0.2, r: 20, scale: 1 };
-  gravity = 0.35;
+  player = { x: width / 3, y: height * 0.1, r: 20, scale: 1 };
+  gravity = 0.25;
   lift = -10;
   velocity = 0;
   pipes = [];
