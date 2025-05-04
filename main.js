@@ -17,7 +17,7 @@ let frame = 0;
 let gameInterval;
 let pipeGap = 620;
 let pipeSpeed = 3;
-let pipeSpacing = 110;
+let pipeSpacing = 500;
 const pipeWidth = 60;
 let trail = [];
 let score = 0;
@@ -30,6 +30,9 @@ let gridOffsetX = 0;
 let gridOffsetY = 0;
 let gridWaveFrame = 0;
 let gameEnded = false; 
+let explosionParticles = [];
+let explosionProgress = 0;
+
 
 function prepareGame() {
   gameEnded = false; // Reiniciar al preparar nueva partida
@@ -42,8 +45,8 @@ function prepareGame() {
   gameStarted = false;
 
   player = { x: width / 3, y: height * 0.1, r: 20, scale: 1 };
-  gravity = 0.22;
-  lift = -10;
+  gravity = 0.2;
+  lift = -6.5;
   velocity = 0;
   pipes = [];
   hazards = [];
@@ -80,17 +83,13 @@ function startGame() {
 function endGame(type = "default") {
   if (gameEnded) return;
   gameEnded = true;
-  // Efecto de temblor eliminado
-  cancelAnimationFrame(gameInterval);
+  pipeSpeed *= 0.3;
   spark = true;
   sparkFrames = 30;
-  drawSpark(player.x, player.y);
-  ctx.clearRect(0, 0, width, height);
-  drawGridBackground();
-  drawPipes();
-  drawHazards();
-  drawPlayer();
-  drawSpark(player.x, player.y);
+  createExplosionParticles(player.x, player.y);
+  cancelAnimationFrame(gameInterval);
+  requestAnimationFrame(animateExplosion); // 👈 lanza el nuevo bucle
+  
 
   const warningBox = document.getElementById("warning");
   const warnings = {
@@ -316,30 +315,6 @@ function drawHazards() {
   hazards = hazards.filter(h => h.x > -20);
 }
 
-function drawGridBackground() {
-  ctx.save();
-  ctx.strokeStyle = `rgba(0,255,255,${gridAlpha})`;
-  ctx.lineWidth = 1;
-
-  const offsetX = gridOffsetX;
-  const offsetY = gridOffsetY;
-
-  for (let x = -40; x < width + 40; x += 40) {
-    ctx.beginPath();
-    ctx.moveTo(x + offsetX, 0);
-    ctx.lineTo(x + offsetX, height);
-    ctx.stroke();
-  }
-
-  for (let y = -40; y < height + 40; y += 40) {
-    ctx.beginPath();
-    ctx.moveTo(0, y + offsetY);
-    ctx.lineTo(width, y + offsetY);
-    ctx.stroke();
-  }
-
-  ctx.restore();
-}
 
 function updateGame() {
   if (gameEnded) return;
@@ -352,7 +327,7 @@ function updateGame() {
   if (frame % 300 === 0 && pipeGap > 120) {
     pipeGap -= 10;
     pipeSpeed += 0.3;
-    pipeSpacing = Math.max(60, pipeSpacing - 5);
+    pipeSpacing = Math.max(100, pipeSpacing - 5);
   }
 
   if (frame % 800 === 0) {
@@ -410,15 +385,47 @@ function updateGame() {
   drawPlayer();
 
   if (spark && sparkFrames > 0) {
+  
+    const progress = 1 - sparkFrames / 30;
     drawSpark(player.x, player.y);
+    drawShockwave(player.x, player.y, progress);
+  
+  
+    if (sparkFrames > 28) {
+      ctx.fillStyle = `rgba(255,255,255,0.15)`;
+      ctx.fillRect(0, 0, width, height); // Flash inicial
+    }
+  
     sparkFrames--;
   }
+  
 
   let potencia = 50 - ((player.y / height) * 30);
   potencia = Math.max(20, Math.min(50, potencia));
 
   fireHue += 0.5;
   if (fireHue > 60) fireHue = 30;
+
+  // 💨 Dibujar partículas persistentes
+explosionParticles.forEach(p => {
+  const vx = Math.cos(p.angle) * p.speed;
+  const vy = Math.sin(p.angle) * p.speed;
+
+  p.x += vx;
+  p.y += vy;
+  p.speed *= 0.92;
+  p.life -= 1;
+
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+  ctx.fillStyle = `hsla(${p.hue}, 100%, 60%, ${p.life / 40})`;
+  ctx.shadowColor = `hsla(${p.hue}, 100%, 80%, ${p.life / 40})`;
+  ctx.shadowBlur = 15;
+  ctx.fill();
+});
+explosionParticles = explosionParticles.filter(p => p.life > 0);
+
+
   gameInterval = requestAnimationFrame(updateGame);
 }
 
@@ -469,26 +476,7 @@ window.addEventListener('load', () => {
   document.addEventListener('touchstart', flap);
 });
 
-function drawSpark(x, y) {
-  for (let i = 0; i < 40; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const length = Math.random() * 50 + 30;
-    const x2 = x + Math.cos(angle) * length;
-    const y2 = y + Math.sin(angle) * length;
 
-    const hues = [40, 50, 60, 30, 0]; // Amarillo, blanco cálido y naranja fuego
-    const hue = hues[Math.floor(Math.random() * hues.length)];
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x2, y2);
-    ctx.strokeStyle = `hsl(${hue}, 100%, 85%)`;
-    ctx.lineWidth = Math.random() * 3 + 1;
-    ctx.shadowColor = `hsl(${hue}, 100%, 90%)`;
-    ctx.shadowBlur = 25;
-    ctx.stroke();
-  }
-  ctx.shadowBlur = 0;
-}
 function drawGridBackground() {
   ctx.save();
   ctx.strokeStyle = `rgba(0,255,255,${gridAlpha})`;
@@ -514,22 +502,123 @@ function drawGridBackground() {
   ctx.restore();
 }
 function drawSpark(x, y) {
-  for (let i = 0; i < 40; i++) {
+  explosionProgress = 1 - sparkFrames / 30;
+
+  // 🌟 FLASH blanco breve
+  if (sparkFrames > 28) {
+    ctx.fillStyle = `rgba(255,255,255,0.2)`;
+    ctx.fillRect(0, 0, width, height);
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+  }
+
+  // 🔥 Chispas radiales
+  for (let i = 0; i < 30; i++) {
     const angle = Math.random() * Math.PI * 2;
     const length = Math.random() * 50 + 30;
     const x2 = x + Math.cos(angle) * length;
     const y2 = y + Math.sin(angle) * length;
+    const hue = 30 + Math.random() * 30;
 
-    const hues = [40, 50, 60, 30, 0]; // Amarillo, blanco cálido y naranja fuego
-    const hue = hues[Math.floor(Math.random() * hues.length)];
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(x2, y2);
+    ctx.globalAlpha = Math.random() * 0.5 + 0.5;
     ctx.strokeStyle = `hsl(${hue}, 100%, 70%)`;
-    ctx.lineWidth = Math.random() * 3 + 1;
-    ctx.shadowColor = `hsl(${hue}, 100%, 70%)`;
+    ctx.lineWidth = Math.random() * 2 + 1.5;
+    ctx.shadowColor = `hsl(${hue}, 100%, 85%)`;
     ctx.shadowBlur = 25;
     ctx.stroke();
   }
+
+  ctx.globalAlpha = 1;
+  ctx.shadowBlur = 0;
+
+  // 🌊 Onda expansiva
+  drawShockwave(x, y, explosionProgress);
+
+  // ⚡ Ráfagas rotatorias
+  for (let i = 0; i < 6; i++) {
+    const angle = (Math.PI * 2 / 6) * i + explosionProgress * 2;
+    const x1 = x + Math.cos(angle) * 10;
+    const y1 = y + Math.sin(angle) * 10;
+    const x2 = x + Math.cos(angle) * (60 + explosionProgress * 40);
+    const y2 = y + Math.sin(angle) * (60 + explosionProgress * 40);
+
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.strokeStyle = `rgba(255,255,0,${1 - explosionProgress})`;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+}
+
+
+function drawShockwave(x, y, progress) {
+  const maxRadius = 100;
+  const radius = progress * maxRadius;
+  const alpha = 1 - progress;
+
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+  ctx.lineWidth = 4;
+  ctx.shadowColor = `rgba(255, 255, 255, ${alpha})`;
+  ctx.shadowBlur = 20;
+  ctx.stroke();
   ctx.shadowBlur = 0;
 }
+
+function createExplosionParticles(x, y) {
+  explosionParticles = [];
+  for (let i = 0; i < 50; i++) {
+    explosionParticles.push({
+      x, y,
+      angle: Math.random() * Math.PI * 2,
+      speed: Math.random() * 6 + 2,
+      size: Math.random() * 2 + 1.5,
+      hue: Math.floor(Math.random() * 40 + 20),
+      life: 30 + Math.random() * 10
+    });
+  }
+}
+
+function animateExplosion() {
+  ctx.clearRect(0, 0, width, height);
+  drawGridBackground();
+  drawPipes();
+  drawHazards();
+  drawPlayer();
+
+  const progress = 1 - sparkFrames / 30;
+  drawSpark(player.x, player.y);
+  drawShockwave(player.x, player.y, progress);
+
+  // Partículas
+  explosionParticles.forEach(p => {
+    const vx = Math.cos(p.angle) * p.speed;
+    const vy = Math.sin(p.angle) * p.speed;
+
+    p.x += vx;
+    p.y += vy;
+    p.speed *= 0.92;
+    p.life -= 1;
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${p.hue}, 100%, 60%, ${p.life / 40})`;
+    ctx.shadowColor = `hsla(${p.hue}, 100%, 80%, ${p.life / 40})`;
+    ctx.shadowBlur = 15;
+    ctx.fill();
+  });
+
+  explosionParticles = explosionParticles.filter(p => p.life > 0);
+  sparkFrames--;
+
+  if (sparkFrames > 0 || explosionParticles.length > 0) {
+    requestAnimationFrame(animateExplosion);
+  }
+}
+
+
+
