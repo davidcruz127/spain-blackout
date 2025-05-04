@@ -58,6 +58,23 @@
     gtag('config', 'G-KX03S4CQTK');
   </script>
 
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCC7CjqnwdkiF6XMd6X-qkuIAqjTLAy6Ok",
+      authDomain: "spain-blackout.firebaseapp.com",
+      databaseURL: "https://spain-blackout-default-rtdb.firebaseio.com",
+      projectId: "spain-blackout",
+      storageBucket: "spain-blackout.firebasestorage.app",
+      messagingSenderId: "122354187288",
+      appId: "1:122354187288:web:2c9c57ee5b6b5b972ad76d"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+  </script>
   <script src="main.js"></script>
+
 </body>
 </html>

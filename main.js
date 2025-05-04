@@ -134,13 +134,33 @@ function endGame(type = "default") {
     document.getElementById('legend').style.display = 'none';
     document.getElementById('finalScore').innerText = 'Puntuación: ' + score;
 
-    let ranking = JSON.parse(localStorage.getItem("sb_ranking") || "[]");
-    ranking.push(score);
-    ranking.sort((a, b) => b - a);
-    ranking = ranking.slice(0, 5);
-    localStorage.setItem("sb_ranking", JSON.stringify(ranking));
+    // Guardar puntuación en el ranking local
+    // let ranking = JSON.parse(localStorage.getItem("sb_ranking") || "[]");
+    // ranking.push(score);
+    // ranking.sort((a, b) => b - a);
+    // ranking = ranking.slice(0, 5);
+    // localStorage.setItem("sb_ranking", JSON.stringify(ranking));
+    firebase.database().ref("scores").push({
+      score: score,
+      time: Date.now()
+    });
 
-    document.getElementById('ranking').innerHTML = "<strong>Top 5:</strong><br>" + ranking.map((s, i) => `${i + 1}. ${s} pts`).join("<br>");
+
+    // document.getElementById('ranking').innerHTML = "<strong>Top 5:</strong><br>" + ranking.map((s, i) => `${i + 1}. ${s} pts`).join("<br>");
+    firebase.database().ref("scores")
+    .orderByChild("score")
+    .limitToLast(5)
+    .once("value", (snapshot) => {
+      const scores = [];
+      snapshot.forEach(child => {
+        scores.push(child.val());
+      });
+      scores.reverse();
+      document.getElementById('ranking').innerHTML = "<strong>Top Global:</strong><br>" +
+        scores.map((s, i) => `${i + 1}. ${s.score} pts`).join("<br>");
+    });
+  
+
     document.getElementById('gameOverMessage').innerText = {
       overvoltage: "⚡ ¡Sistema colapsado por sobrevoltaje!",
       blackout: "💡 ¡Apagón total por falta de suministro!",
