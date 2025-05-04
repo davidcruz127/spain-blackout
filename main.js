@@ -134,15 +134,13 @@ function endGame(type = "default") {
     document.getElementById('legend').style.display = 'none';
     document.getElementById('finalScore').innerText = 'Puntuación: ' + score;
 
+    const now = new Date();
+    const fechaLegible = now.toLocaleString("es-ES");
+
     // Guardar puntuación en el ranking local
-    // let ranking = JSON.parse(localStorage.getItem("sb_ranking") || "[]");
-    // ranking.push(score);
-    // ranking.sort((a, b) => b - a);
-    // ranking = ranking.slice(0, 5);
-    // localStorage.setItem("sb_ranking", JSON.stringify(ranking));
     firebase.database().ref("scores").push({
       score: score,
-      time: Date.now()
+      time: fechaLegible
     });
 
 

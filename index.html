@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="intro">⚡ Spain Blackout ⚡</div>
+  <div id="intro">⚡ Spain Blackout ⚡</div>
 
   <!-- Menú de inicio -->
   <div id="menu" class="panel">
@@ -49,32 +49,66 @@
   <audio id="endGameSound" src="sounds/end.mp3"></audio>
 
   <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-KX03S4CQTK"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
+  <script async src="https://www.googletagmanager.com/gtag/js"></script>
 
-    gtag('config', 'G-KX03S4CQTK');
-  </script>
-
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+  <!-- Detectar entorno y cargar configuración -->
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCC7CjqnwdkiF6XMd6X-qkuIAqjTLAy6Ok",
-      authDomain: "spain-blackout.firebaseapp.com",
-      databaseURL: "https://spain-blackout-default-rtdb.firebaseio.com",
-      projectId: "spain-blackout",
-      storageBucket: "spain-blackout.firebasestorage.app",
-      messagingSenderId: "122354187288",
-      appId: "1:122354187288:web:2c9c57ee5b6b5b972ad76d"
+    const loadConfig = () => {
+      return new Promise((resolve) => {
+        const script = document.createElement('script');
+        // Si estamos en localhost, cargamos config.js (privado). Si no, config.prod.js
+        script.src = location.hostname === "localhost" ? "config.js" : "config.prod.js";
+        script.onload = () => resolve();
+        script.onerror = () => {
+          console.warn("Archivo de configuración no encontrado.");
+          window.CONFIG = {
+            FIREBASE_API_KEY: "",
+            GOOGLE_ANALYTICS_ID: ""
+          };
+          resolve();
+        };
+        document.head.appendChild(script);
+      });
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    loadConfig().then(() => {
+      // Google Analytics
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      if (CONFIG.GOOGLE_ANALYTICS_ID) {
+        gtag('config', CONFIG.GOOGLE_ANALYTICS_ID);
+      }
+
+      // Inicializar Firebase
+      if (CONFIG.FIREBASE_API_KEY) {
+        const firebaseConfig = {
+          apiKey: CONFIG.FIREBASE_API_KEY,
+          authDomain: "spain-blackout.firebaseapp.com",
+          databaseURL: "https://spain-blackout-default-rtdb.firebaseio.com",
+          projectId: "spain-blackout",
+          storageBucket: "spain-blackout.appspot.com",
+          messagingSenderId: "122354187288",
+          appId: "1:122354187288:web:2c9c57ee5b6b5b972ad76d"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        window.db = firebase.database();
+      } else {
+        console.warn("Firebase no inicializado: falta clave API.");
+      }
+
+      // Cargar el juego
+      const mainScript = document.createElement('script');
+      mainScript.src = "main.js";
+      document.body.appendChild(mainScript);
+    });
   </script>
-  <script src="main.js"></script>
 
 </body>
 </html>
