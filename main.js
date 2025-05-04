@@ -63,6 +63,15 @@ function startGame() {
   fireHue += 0.5;
   if (fireHue > 60) fireHue = 30;
   gameInterval = requestAnimationFrame(updateGame);
+
+  // Google Analytics - Evento de partida iniciada
+  if (typeof gtag === 'function') {
+    gtag('event', 'partida_iniciada', {
+      event_category: 'Juego',
+      event_label: 'Inicio desde menú'
+    });
+  }
+
 }
 
 function endGame(type = "default") {
@@ -107,6 +116,15 @@ function endGame(type = "default") {
       }
     }, 50);
     setTimeout(() => document.body.classList.remove('dark'), 1200);
+  }
+
+  // Google Analytics - Evento de partida finalizada
+  if (typeof gtag === 'function') {
+    gtag('event', 'partida_finalizada', {
+      event_category: 'Juego',
+      event_label: 'Tipo: ' + type,
+      value: score
+    });
   }
 
   setTimeout(() => {
