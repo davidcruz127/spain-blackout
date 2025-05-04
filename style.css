@@ -308,3 +308,10 @@ canvas {
   50% { background-color: #000; }
   100% { background-color: #111; }
 }
+
+@media (max-width: 480px) {
+  #intro {
+    font-size: 1.6rem; /* Ajuste más pequeño para móviles */
+    padding: 0 10px;
+  }
+}
