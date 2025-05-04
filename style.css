@@ -43,10 +43,12 @@ button:hover {
 
 #intro.fade-out {
   opacity: 0;
+  transition: opacity 2s ease-out;
 }
 
 /* Menú principal */
 #menu {
+  display: none;
   position: absolute;
   top: 20%;
   left: 50%;
@@ -148,6 +150,7 @@ button:hover {
 
 #scoreDisplay {
   left: 10px;
+  display: none;
 }
 
 #powerDisplay {
@@ -262,6 +265,7 @@ canvas {
 
 
 #legend {
+  display: none;
   position: absolute;
   bottom: 10px;
   left: 10px;

@@ -36,6 +36,7 @@ function prepareGame() {
   document.getElementById('menu').style.display = 'none';
   document.getElementById('gameOver').style.display = 'none';
   document.getElementById('scoreDisplay').style.display = 'none';
+  document.getElementById('legend').style.display = 'none';
   document.getElementById('tapToStart').style.display = 'flex';
   gameReady = true;
   gameStarted = false;
@@ -59,6 +60,8 @@ function prepareGame() {
 function startGame() {
   document.getElementById('tapToStart').style.display = 'none';
   document.getElementById('scoreDisplay').style.display = 'block';
+  document.getElementById('legend').style.display = 'block';
+
   gameStarted = true;
   fireHue += 0.5;
   if (fireHue > 60) fireHue = 30;
@@ -129,6 +132,7 @@ function endGame(type = "default") {
 
   setTimeout(() => {
     document.getElementById('scoreDisplay').style.display = 'none';
+    document.getElementById('legend').style.display = 'none';
     document.getElementById('finalScore').innerText = 'Puntuación: ' + score;
 
     let ranking = JSON.parse(localStorage.getItem("sb_ranking") || "[]");
@@ -447,9 +451,13 @@ window.addEventListener('load', () => {
     }
 
     intro.classList.add('fade-out');
+
     setTimeout(() => {
       intro.style.display = 'none';
-    }, 1000);
+
+      // 👇 Mostramos el menú principal justo después de la intro
+      document.getElementById('menu').style.display = 'block';
+    }, 2000); // <-- tiempo total de animación (puedes ajustar)
   }
 
   const startBtn = document.getElementById('startButton');
