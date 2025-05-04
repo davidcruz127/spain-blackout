@@ -315,3 +315,25 @@ canvas {
     padding: 0 10px;
   }
 }
+
+#menuImage {
+  max-width: 200px;
+  margin-bottom: 20px;
+  border-radius: 16px; /* Bordes redondeados */
+  animation: fadeInDrop 1.2s ease-out forwards;
+  opacity: 0;
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.6));
+}
+
+@keyframes fadeInDrop {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+
