@@ -502,7 +502,10 @@ window.addEventListener('load', () => {
 
   const startBtn = document.getElementById('startButton');
   const retryBtn = document.getElementById('retryButton');
-  if (startBtn) startBtn.addEventListener('click', prepareGame);
+  if (startBtn) {
+    startBtn.addEventListener('click', prepareGame);
+    startBtn.addEventListener('touchstart', prepareGame, { passive: true });
+  }
   const exitBtn = document.getElementById('exitButton');
   if (exitBtn) exitBtn.addEventListener('click', () => {
     document.getElementById('gameOver').style.display = 'none';
