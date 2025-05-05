@@ -515,7 +515,10 @@ window.addEventListener('load', () => {
   if (retryBtn) retryBtn.addEventListener('click', prepareGame);
 
   document.addEventListener('click', flap);
-    document.addEventListener('touchstart', (e) => {
+  document.addEventListener('touchstart', (e) => {
+    // Ignora si el toque viene de un botón u otro elemento interactivo
+    if (e.target.closest('button') || e.target.closest('a') || e.target.closest('input')) return;
+  
     e.preventDefault();
     flap();
   }, { passive: false });
