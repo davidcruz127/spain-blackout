@@ -108,6 +108,7 @@ function endGame(type = "default") {
       flash = !flash;
     }, 100);
     setTimeout(() => clearInterval(flashInterval), 600);
+  
   } else if (type === "blackout") {
     document.body.classList.add('dark');
     const fadeInterval = setInterval(() => {
@@ -118,7 +119,14 @@ function endGame(type = "default") {
       }
     }, 50);
     setTimeout(() => document.body.classList.remove('dark'), 1200);
-  }
+    } else if (type === "default") {
+      const sound = document.getElementById("hitDefault");
+      if (sound) {
+        sound.currentTime = 0;
+        sound.play();
+      }
+    }
+    
 
   // Google Analytics - Evento de partida finalizada
   if (typeof gtag === 'function') {
@@ -136,6 +144,10 @@ function endGame(type = "default") {
 
     const now = new Date();
     const fechaLegible = now.toLocaleString("es-ES");
+
+    
+    const best = localStorage.getItem("bestScore") || 0;
+    if (score > best) localStorage.setItem("bestScore", score);
 
     // Guardar puntuación en el ranking local
     firebase.database().ref("scores").push({
@@ -156,6 +168,9 @@ function endGame(type = "default") {
       scores.reverse();
       document.getElementById('ranking').innerHTML = "<strong>Top Global:</strong><br>" +
         scores.map((s, i) => `${i + 1}. ${s.score} pts`).join("<br>");
+    const localBest = localStorage.getItem("bestScore") || 0;
+    document.getElementById('ranking').innerHTML += `<br><em>Mejor local: ${localBest} pts</em>`;
+
     });
   
 
@@ -488,10 +503,19 @@ window.addEventListener('load', () => {
   const startBtn = document.getElementById('startButton');
   const retryBtn = document.getElementById('retryButton');
   if (startBtn) startBtn.addEventListener('click', prepareGame);
+  const exitBtn = document.getElementById('exitButton');
+  if (exitBtn) exitBtn.addEventListener('click', () => {
+    document.getElementById('gameOver').style.display = 'none';
+    document.getElementById('menu').style.display = 'block';
+  });
+
   if (retryBtn) retryBtn.addEventListener('click', prepareGame);
 
   document.addEventListener('click', flap);
-  document.addEventListener('touchstart', flap);
+    document.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    flap();
+  }, { passive: false });
 });
 
 

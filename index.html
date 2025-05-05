@@ -6,6 +6,9 @@
   <title>Spain Blackout</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="manifest" href="manifest.json" />
+
 </head>
 <body>
   <div id="intro">⚡ Spain Blackout ⚡</div>
@@ -26,7 +29,10 @@
     <h1 id="gameOverMessage">🔌 Apagón total 🔌</h1>
     <h2 id="finalScore">Puntuación: 0</h2>
     <div id="ranking"><strong>Top 5:</strong><br /></div>
-    <button id="retryButton">🔄 Reintentar</button>
+    <div id="gameOverButtons">
+      <button id="retryButton">🔄 Reintentar</button>
+      <button id="exitButton">🏠 Volver al menú</button>
+    </div>    
   </div>
 
   <!-- Marcadores -->
@@ -47,6 +53,8 @@
   <audio id="hitBlackout" src="sounds/blackout.mp3"></audio>
   <audio id="chargeSound" src="sounds/charge.mp3"></audio>
   <audio id="endGameSound" src="sounds/end.mp3"></audio>
+  <audio id="hitDefault" src="sounds/default.mp3"></audio>
+
 
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js"></script>
@@ -108,6 +116,13 @@
       mainScript.src = "main.js";
       document.body.appendChild(mainScript);
     });
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(reg => console.log('✅ Service Worker registrado:', reg.scope))
+        .catch(err => console.warn('❌ Error al registrar Service Worker:', err));
+    }
   </script>
 
 </body>

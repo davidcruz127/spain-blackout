@@ -337,3 +337,48 @@ canvas {
 }
 
 
+
+
+/* === Mejoras UX móvil === */
+
+@media (max-width: 480px) {
+  #legend {
+    bottom: 70px;
+    font-size: 1rem;
+    padding: 10px;
+  }
+
+  #scoreDisplay {
+    top: 10px;
+    left: 10px;
+    font-size: 1.1rem;
+  }
+
+  #warning {
+    top: 60px;
+    font-size: 1rem;
+  }
+
+  #startButton {
+    font-size: 1.5rem;
+    padding: 16px 28px;
+    width: 100%;
+    max-width: 320px;
+  }
+}
+
+
+/* Transición suave para modo oscuro */
+body.dark {
+  background-color: black !important;
+  transition: background-color 0.5s ease;
+}
+
+
+#gameOverButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  margin-top: 20px;
+}
