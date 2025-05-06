@@ -382,3 +382,13 @@ body.dark {
   align-items: center;
   margin-top: 20px;
 }
+
+.legend-box {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  vertical-align: middle;
+  border: 1px solid #333; /* opcional: para mejor contraste */
+  border-radius: 2px;      /* opcional: esquinas suaves */
+}

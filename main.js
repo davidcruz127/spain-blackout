@@ -263,10 +263,6 @@ function drawPipes() {
     ctx.shadowBlur = 10;
     ctx.fillRect(p.x, 0, pipeWidth, p.top);
 
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 16px sans-serif";
-    ctx.fillText("⚡", p.x + 15, p.top - 5);
-
     // Efectos eléctricos aleatorios
     for (let i = 0; i < 3; i++) {
       const sx = p.x + Math.random() * pipeWidth;
@@ -294,9 +290,6 @@ function drawPipes() {
     ctx.shadowColor = "#66ccff";
     ctx.shadowBlur = 10;
     ctx.fillRect(p.x, p.top + pipeGap, pipeWidth, height - p.top - pipeGap);
-
-    ctx.fillStyle = "#fff";
-    ctx.fillText("💡", p.x + 15, p.top + pipeGap + 30);
 
     if (Math.random() < 0.15) {
       ctx.fillStyle = "rgba(0,0,0,0.2)";
@@ -525,16 +518,37 @@ window.addEventListener('load', () => {
 });
 
 
+// Crear partículas al iniciar
+const particles = Array.from({ length: 50 }, () => ({
+  x: Math.random() * width,
+  y: Math.random() * height,
+  r: Math.random() * 2 + 1,
+  dx: (Math.random() - 0.5) * 0.2,
+  dy: (Math.random() - 0.5) * 0.2
+}));
+
 function drawGridBackground() {
   ctx.save();
-  ctx.strokeStyle = `rgba(0,255,255,${gridAlpha})`;
-  ctx.lineWidth = 1;
 
-  const offsetX = gridOffsetX;
-  const offsetY = gridOffsetY;
+  const time = performance.now() / 1000;
+  const dynamicAlpha = 0.15 + 0.05 * Math.sin(time);
 
+  // Gradiente animado
+  const r = Math.floor(100 + 100 * Math.sin(time * 0.5));
+  const g = Math.floor(255 * Math.abs(Math.cos(time * 0.3)));
+  const b = 255;
+
+  ctx.shadowColor = `rgba(${r},${g},${b},0.8)`;
+  ctx.shadowBlur = 2;
+
+  const offsetX = gridOffsetX || 0;
+  const offsetY = gridOffsetY || 0;
+
+  // Dibuja cuadrícula
   for (let x = -40; x < width + 40; x += 40) {
     ctx.beginPath();
+    ctx.lineWidth = ((x + offsetX) % 200 === 0) ? 2 : 1;
+    ctx.strokeStyle = `rgba(${r},${g},${b},${dynamicAlpha})`;
     ctx.moveTo(x + offsetX, 0);
     ctx.lineTo(x + offsetX, height);
     ctx.stroke();
@@ -542,15 +556,45 @@ function drawGridBackground() {
 
   for (let y = -40; y < height + 40; y += 40) {
     ctx.beginPath();
+    ctx.lineWidth = ((y + offsetY) % 200 === 0) ? 2 : 1;
+    ctx.strokeStyle = `rgba(${r},${g},${b},${dynamicAlpha})`;
     ctx.moveTo(0, y + offsetY);
     ctx.lineTo(width, y + offsetY);
     ctx.stroke();
   }
 
+  // Puntos en intersecciones
+  for (let x = -40; x < width + 40; x += 40) {
+    for (let y = -40; y < height + 40; y += 40) {
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(${r},${g},${b},${dynamicAlpha * 0.6})`;
+      ctx.arc(x + offsetX, y + offsetY, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // Partículas flotantes
+  particles.forEach(p => {
+    p.x += p.dx;
+    p.y += p.dy;
+
+    // Rebote en bordes
+    if (p.x < 0 || p.x > width) p.dx *= -1;
+    if (p.y < 0 || p.y > height) p.dy *= -1;
+
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(${r},${g},${b},0.3)`;
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
   ctx.restore();
 }
+
+
 function drawSpark(x, y) {
-  explosionProgress = 1 - sparkFrames / 30;
+  explosionProgress = 1 - sparkFrames / 60; // antes era /30
+
 
   // 🌟 FLASH blanco breve
   if (sparkFrames > 28) {
@@ -649,7 +693,7 @@ function animateExplosion() {
 
     p.x += vx;
     p.y += vy;
-    p.speed *= 0.92;
+    p.speed *= 0.80;
     p.life -= 1;
 
     ctx.beginPath();
